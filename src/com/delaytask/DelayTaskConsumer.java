@@ -4,7 +4,9 @@ import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.delaytask.callback.CallBackTask;
+import com.delaytask.callback.AbstractCallBackRelolver;
+import com.delaytask.callback.ICallBack;
+import com.delaytask.callback.ICallBackRelolver;
 import com.delaytask.queue.DelayTaskQueue;
 import com.delaytask.queue.DelayTaskQueueElement;
 
@@ -31,8 +33,25 @@ public class DelayTaskConsumer implements Runnable {
     private Boolean isRun = false;
     // 消费任务时的线程池
     private ExecutorService consumeTaskThreadPool;
+    // 消费任务时的线程池
+    private ICallBackRelolver callBackRelolver;
 
     private DelayTaskConsumer() {
+    }
+
+    public static DelayTaskConsumer getInstance(DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue,
+            ICallBackRelolver callBackRelolver) {
+        if (instance == null) {
+            synchronized (DelayTaskConsumer.class) {
+                if (instance == null) {
+                    instance = new DelayTaskConsumer();
+                    instance.delayTaskQueue = delayTaskQueue;
+                    instance.consumeTaskThreadPool = Executors.newFixedThreadPool(8);
+                    instance.callBackRelolver = callBackRelolver;
+                }
+            }
+        }
+        return instance;
     }
 
     public static DelayTaskConsumer getInstance(DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue) {
@@ -41,8 +60,25 @@ public class DelayTaskConsumer implements Runnable {
                 if (instance == null) {
                     instance = new DelayTaskConsumer();
                     instance.delayTaskQueue = delayTaskQueue;
-                    // 初始化消费任务线程池,8个
                     instance.consumeTaskThreadPool = Executors.newFixedThreadPool(8);
+                    instance.callBackRelolver = new AbstractCallBackRelolver() {
+
+                        @Override
+                        public ICallBack getCallBackInstance() {
+                            Thread currentThread = Thread.currentThread();
+                            // 获取Class
+                            Class<ICallBack> callBackClass;
+                            try {
+                                callBackClass = (Class<ICallBack>) Class.forName(this.delayTaskElement.getName());
+                                // 获取无参构造对象
+                                return callBackClass.newInstance();
+                            } catch (Exception e) {
+                                System.out.println("======CallBackTask ERROR======" + currentThread.getId());
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+                    };
                 }
             }
         }
@@ -115,12 +151,12 @@ public class DelayTaskConsumer implements Runnable {
             // 2.验证是否移除成功。为了防止多个服务节点重复执行callback，只有成功remove的那个节点会执行callback，其他节点不执行
             if (delayTaskQueue.remove(delayTaskElement)) {
                 // 3.执行回调。为了避免callback执行耗时过长影响任务的消费，这里最好也为异步
-                consumeTaskThreadPool.execute(new CallBackTask(delayTaskElement.getDelayTaskElement()));
+                callBackRelolver.setDelayTaskElement(delayTaskElement.getDelayTaskElement());
+                consumeTaskThreadPool.execute(callBackRelolver);
             } else {
                 System.out.println("======DelayTaskConsumerBizImpl RUN IS CONFLICT======");
             }
         }
         System.out.println("======callBack RUN end======" + currentThread.getId());
     }
-
 }

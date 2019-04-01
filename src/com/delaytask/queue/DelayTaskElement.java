@@ -13,8 +13,6 @@ public class DelayTaskElement {
 
     private String name;
 
-    private EnumDelayTaskCallBackType type;
-
     private String[] params;
 
     public DelayTaskElement() {
@@ -29,14 +27,6 @@ public class DelayTaskElement {
         this.name = name;
     }
 
-    public EnumDelayTaskCallBackType getType() {
-        return type;
-    }
-
-    public void setType(EnumDelayTaskCallBackType type) {
-        this.type = type;
-    }
-
     public String[] getParams() {
         return params;
     }
@@ -47,7 +37,7 @@ public class DelayTaskElement {
 
     @Override
     public String toString() {
-        return "DelayTaskElement [name=" + name + ", type=" + type + ", params=" + Arrays.toString(params) + "]";
+        return "DelayTaskElement [name=" + name + ", params=" + Arrays.toString(params) + "]";
     }
 
 }

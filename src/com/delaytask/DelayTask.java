@@ -7,7 +7,6 @@ import com.delaytask.callback.ICallBack;
 import com.delaytask.queue.DelayTaskElement;
 import com.delaytask.queue.DelayTaskQueue;
 import com.delaytask.queue.DelayTaskQueueElement;
-import com.delaytask.queue.EnumDelayTaskCallBackType;
 
 /**
  * 
@@ -27,21 +26,32 @@ public class DelayTask implements IDelayTask {
     }
 
     @Override
-    public void handle4Reflect(Class<? extends ICallBack> class1, String[] callBackParams, Integer delaySecond) {
-        this.handle(class1.getName(), EnumDelayTaskCallBackType.Reflect, callBackParams, delaySecond);
+    public void handle(Class<? extends ICallBack> callBackClass, String[] callBackParams, Integer delaySecond) {
+        this.handle(callBackClass.getName(), callBackParams, delaySecond);
     }
 
-    @Override
-    public void handle4SpringBean(String callBackBeanName, String[] callBackParams, Integer delaySecond) {
-        this.handle(callBackBeanName, EnumDelayTaskCallBackType.Spring, callBackParams, delaySecond);
-    }
-
-    @Override
-    public void handle4Autowired(ICallBack callBack, String[] callBackParams, Integer delaySecond) {
-        // 第一个参数暂时没用,仅作为强类型验证
-        this.handle("@Autowired " + ICallBack.class.getSimpleName(), EnumDelayTaskCallBackType.ICallBack, callBackParams,
-                delaySecond);
-    }
+    // @Override
+    // public void handle4Reflect(Class<? extends ICallBack> callBackClass,
+    // String[] callBackParams, Integer delaySecond) {
+    // this.handle(callBackClass.getName(), EnumDelayTaskCallBackType.Reflect,
+    // callBackParams, delaySecond);
+    // }
+    //
+    // @Override
+    // public void handle4SpringBean(String callBackBeanName, String[]
+    // callBackParams, Integer delaySecond) {
+    // this.handle(callBackBeanName, EnumDelayTaskCallBackType.Spring,
+    // callBackParams, delaySecond);
+    // }
+    //
+    // @Override
+    // public void handle4Autowired(ICallBack callBack, String[] callBackParams,
+    // Integer delaySecond) {
+    // // 第一个参数暂时没用,仅作为强类型验证
+    // this.handle("@Autowired " + ICallBack.class.getSimpleName(),
+    // EnumDelayTaskCallBackType.ICallBack,
+    // callBackParams, delaySecond);
+    // }
 
     /**
      * 
@@ -55,8 +65,7 @@ public class DelayTask implements IDelayTask {
      * @createTime：2019年3月28日
      * @author: sunjie
      */
-    private void handle(String callBackName, EnumDelayTaskCallBackType delayTaskType, String[] callBackParams,
-            Integer delaySecond) {
+    private void handle(String callBackName, String[] callBackParams, Integer delaySecond) {
         Calendar calendar = Calendar.getInstance();
         if (delaySecond == null || callBackName == null) {
             System.out.println("DelayTask handle ERROR, delaySecond:" + delaySecond + ", callBackName:" + callBackName);
@@ -70,7 +79,6 @@ public class DelayTask implements IDelayTask {
         DelayTaskElement delayTaskElement = new DelayTaskElement();
         delayTaskElement.setName(callBackName);
         delayTaskElement.setParams(callBackParams);
-        delayTaskElement.setType(delayTaskType);
         delayTaskQueueElement.setDelayTaskElement(delayTaskElement);
         delayTaskQueue.add(delayTaskQueueElement);
     }
