@@ -11,8 +11,13 @@ import java.util.Arrays;
  */
 public class DelayTaskElement {
 
+    /**
+     * 回调name
+     */
     private String name;
-
+    /**
+     * 回调参数
+     */
     private String[] params;
 
     public DelayTaskElement() {

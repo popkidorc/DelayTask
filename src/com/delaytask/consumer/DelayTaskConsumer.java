@@ -1,12 +1,13 @@
-package com.delaytask;
+package com.delaytask.consumer;
 
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.delaytask.callback.AbstractCallBackRelolver;
+import com.delaytask.DelayTaskConsts;
 import com.delaytask.callback.ICallBack;
-import com.delaytask.callback.ICallBackRelolver;
+import com.delaytask.callback.relolver.AbstractCallBackRelolver;
+import com.delaytask.callback.relolver.ICallBackRelolver;
 import com.delaytask.queue.DelayTaskQueue;
 import com.delaytask.queue.DelayTaskQueueElement;
 
@@ -21,24 +22,52 @@ public class DelayTaskConsumer implements Runnable {
 
     private static volatile DelayTaskConsumer instance;
 
-    // 频率
+    /**
+     * 频率
+     */
     private static Integer circleFrequencyMilliSecond = DelayTaskConsts.CIRCLE_FREQUENCY_MILLI_SECOND;
-    // 无任务时频率倍数
+    /**
+     * 无任务时频率倍数
+     */
     private static Integer notTasksPower = DelayTaskConsts.NOT_TASK_SPOWER;
 
-    // 使用redis作为队列
-    // private Jedis jedis;
+    /**
+     * 消费队列
+     */
     private DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue;
-    // 运行标记
+    /**
+     * 运行标记
+     */
     private Boolean isRun = false;
-    // 消费任务时的线程池
+    /**
+     * 消费任务时的线程池
+     */
     private ExecutorService consumeTaskThreadPool;
-    // 消费任务时的线程池
+    /**
+     * 回调任务解释器
+     */
     private ICallBackRelolver callBackRelolver;
 
+    /**
+     * 私有构造类，目的为单例
+     */
     private DelayTaskConsumer() {
     }
 
+    /**
+     * 
+     * 初始化
+     * 
+     * @param delayTaskQueue
+     *            消费队列
+     * @param callBackRelolver
+     *            回调解释器
+     * @return
+     * @return DelayTaskConsumer
+     * @exception
+     * @createTime：2019年4月1日
+     * @author: sunjie
+     */
     public static DelayTaskConsumer getInstance(DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue,
             ICallBackRelolver callBackRelolver) {
         if (instance == null) {
@@ -54,6 +83,18 @@ public class DelayTaskConsumer implements Runnable {
         return instance;
     }
 
+    /**
+     * 
+     * 初始化，默认使用反射解析器
+     * 
+     * @param delayTaskQueue
+     *            消费队列
+     * @return
+     * @return DelayTaskConsumer
+     * @exception
+     * @createTime：2019年4月1日
+     * @author: sunjie
+     */
     public static DelayTaskConsumer getInstance(DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue) {
         if (instance == null) {
             synchronized (DelayTaskConsumer.class) {
@@ -62,10 +103,8 @@ public class DelayTaskConsumer implements Runnable {
                     instance.delayTaskQueue = delayTaskQueue;
                     instance.consumeTaskThreadPool = Executors.newFixedThreadPool(8);
                     instance.callBackRelolver = new AbstractCallBackRelolver() {
-
                         @Override
                         public ICallBack getCallBackInstance() {
-                            Thread currentThread = Thread.currentThread();
                             // 获取Class
                             Class<ICallBack> callBackClass;
                             try {
@@ -73,10 +112,8 @@ public class DelayTaskConsumer implements Runnable {
                                 // 获取无参构造对象
                                 return callBackClass.newInstance();
                             } catch (Exception e) {
-                                System.out.println("======CallBackTask ERROR======" + currentThread.getId());
-                                e.printStackTrace();
+                                return null;
                             }
-                            return null;
                         }
                     };
                 }
@@ -86,7 +123,6 @@ public class DelayTaskConsumer implements Runnable {
     }
 
     public void startRun() throws Exception {
-        System.out.println("======DelayTaskConsumer startRun======");
         if (isRun) {
             throw new Exception("======DelayTaskConsumer startRun is has running======");
         }
@@ -98,7 +134,6 @@ public class DelayTaskConsumer implements Runnable {
     }
 
     public void stopRun() throws Exception {
-        System.out.println("======DelayTaskConsumer stopRun======");
         // 改运行标记
         isRun = false;
     }
@@ -109,8 +144,6 @@ public class DelayTaskConsumer implements Runnable {
 
     @Override
     public void run() {
-        Thread currentThread = Thread.currentThread();
-        System.out.println("======callBack RUN start======" + currentThread.getId());
         Calendar calendar;
         int nowSecond;
         DelayTaskQueueElement delayTaskElement;
@@ -123,14 +156,12 @@ public class DelayTaskConsumer implements Runnable {
             }
             // 停止消费则跳出自旋
             if (!isRun) {
-                System.out.println("======callBack RUN INTERRUPTED======" + currentThread.getId());
                 break;
             }
             // 注意：多个服务节点会多次调用
             delayTaskElement = delayTaskQueue.peek();
             // 如果队列中没有任务，则继续扫描
             if (delayTaskElement == null) {
-                System.out.println("======callBack NOT HAVE WAITING DELAY TASKS======" + currentThread.getId());
                 // 延时是防止过于频繁的访问redis，导致命中率降低
                 try {
                     Thread.sleep(circleFrequencyMilliSecond * notTasksPower);
@@ -143,7 +174,6 @@ public class DelayTaskConsumer implements Runnable {
             nowSecond = (int) (calendar.getTimeInMillis() / 1000);
             double delayTime = delayTaskElement.getDelayTime();
             if (nowSecond < delayTime) {
-                System.out.println("======callBack NOT HAVE GET SORCE======" + currentThread.getId());
                 continue;
             }
             // 开始消费
@@ -153,10 +183,7 @@ public class DelayTaskConsumer implements Runnable {
                 // 3.执行回调。为了避免callback执行耗时过长影响任务的消费，这里最好也为异步
                 callBackRelolver.setDelayTaskElement(delayTaskElement.getDelayTaskElement());
                 consumeTaskThreadPool.execute(callBackRelolver);
-            } else {
-                System.out.println("======DelayTaskConsumerBizImpl RUN IS CONFLICT======");
             }
         }
-        System.out.println("======callBack RUN end======" + currentThread.getId());
     }
 }

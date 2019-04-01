@@ -1,5 +1,6 @@
-package com.delaytask.callback;
+package com.delaytask.callback.relolver;
 
+import com.delaytask.callback.ICallBack;
 import com.delaytask.queue.DelayTaskElement;
 
 /**
@@ -41,16 +42,6 @@ public abstract class AbstractCallBackRelolver implements ICallBackRelolver {
 
     @Override
     public void run() {
-        Thread currentThread = Thread.currentThread();
-        System.out.println("======CallBackTask start======" + currentThread.getId());
-        try {
-            ICallBack callBackInstance = getCallBackInstance();
-            // 执行方法
-            callBackInstance.callBackMethod(delayTaskElement.getParams());
-        } catch (Exception e) {
-            System.out.println("======CallBackTask ERROR======" + currentThread.getId());
-            e.printStackTrace();
-        }
-        System.out.println("======CallBackTask end======" + currentThread.getId());
+        getCallBackInstance().callBackMethod(delayTaskElement.getParams());
     }
 }

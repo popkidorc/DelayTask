@@ -17,7 +17,9 @@ import com.delaytask.queue.DelayTaskQueueElement;
  */
 public class DelayTask implements IDelayTask {
 
-    // 使用redis作为队列
+    /**
+     * 消费队列
+     */
     private DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue;
 
     public DelayTask(DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue) {
@@ -27,48 +29,8 @@ public class DelayTask implements IDelayTask {
 
     @Override
     public void handle(Class<? extends ICallBack> callBackClass, String[] callBackParams, Integer delaySecond) {
-        this.handle(callBackClass.getName(), callBackParams, delaySecond);
-    }
-
-    // @Override
-    // public void handle4Reflect(Class<? extends ICallBack> callBackClass,
-    // String[] callBackParams, Integer delaySecond) {
-    // this.handle(callBackClass.getName(), EnumDelayTaskCallBackType.Reflect,
-    // callBackParams, delaySecond);
-    // }
-    //
-    // @Override
-    // public void handle4SpringBean(String callBackBeanName, String[]
-    // callBackParams, Integer delaySecond) {
-    // this.handle(callBackBeanName, EnumDelayTaskCallBackType.Spring,
-    // callBackParams, delaySecond);
-    // }
-    //
-    // @Override
-    // public void handle4Autowired(ICallBack callBack, String[] callBackParams,
-    // Integer delaySecond) {
-    // // 第一个参数暂时没用,仅作为强类型验证
-    // this.handle("@Autowired " + ICallBack.class.getSimpleName(),
-    // EnumDelayTaskCallBackType.ICallBack,
-    // callBackParams, delaySecond);
-    // }
-
-    /**
-     * 
-     * 生产任务放入队列
-     * 
-     * @param callBackName
-     * @param callBackParams
-     * @param delaySecond
-     * @return void
-     * @exception
-     * @createTime：2019年3月28日
-     * @author: sunjie
-     */
-    private void handle(String callBackName, String[] callBackParams, Integer delaySecond) {
         Calendar calendar = Calendar.getInstance();
-        if (delaySecond == null || callBackName == null) {
-            System.out.println("DelayTask handle ERROR, delaySecond:" + delaySecond + ", callBackName:" + callBackName);
+        if (delaySecond == null || callBackClass == null) {
             return;
         }
         calendar.add(Calendar.SECOND, delaySecond);
@@ -77,9 +39,11 @@ public class DelayTask implements IDelayTask {
         delayTaskQueueElement.setDelayTime(second3later);
         delayTaskQueueElement.setDelayTimeUint(TimeUnit.MILLISECONDS);
         DelayTaskElement delayTaskElement = new DelayTaskElement();
-        delayTaskElement.setName(callBackName);
+        delayTaskElement.setName(callBackClass.getName());
         delayTaskElement.setParams(callBackParams);
         delayTaskQueueElement.setDelayTaskElement(delayTaskElement);
+        // 生产任务放入队列
         delayTaskQueue.add(delayTaskQueueElement);
     }
+
 }

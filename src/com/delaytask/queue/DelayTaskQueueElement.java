@@ -11,10 +11,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class DelayTaskQueueElement {
 
+    /**
+     * 延时时间
+     */
     private double delayTime;
-
+    /**
+     * 延时时间单位
+     */
     private TimeUnit delayTimeUint;
-
+    /**
+     * 任务元素
+     */
     private DelayTaskElement delayTaskElement;
 
     public double getDelayTime() {
