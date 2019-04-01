@@ -2,6 +2,13 @@ package com.delaytask.queue;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 
+ * 延迟任务队列元素
+ * 
+ * @author sunjie
+ *
+ */
 public class DelayTaskQueueElement {
 
     private double delayTime;

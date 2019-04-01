@@ -1,10 +1,13 @@
 package com.delaytask;
 
+/**
+ * 
+ * 延迟任务常量
+ * 
+ * @author sunjie
+ *
+ */
 public class DelayTaskConsts {
-
-    private static final String LOCALHOST = "127.0.0.1";
-    private static final String PORT = "6379";
-    private static final String USER_LAST_AUDIT_OPERATE_TIME_ZSET_KEY = "USER_LAST_AUDIT_OPERATE_TIME_ZSET";
 
     /** 延迟任务redis key */
     public static final String DELAY_TASK_ZSET_KEY = "DELAY_TASK_ZSET_KEY";

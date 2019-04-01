@@ -1,6 +1,13 @@
 package com.delaytask.queue;
 
-public enum EnumDelayTaskType {
+/**
+ * 
+ * 延迟任务对调类型
+ * 
+ * @author sunjie
+ *
+ */
+public enum EnumDelayTaskCallBackType {
     Spring("Spring"),
 
     Reflect("Reflect"),
@@ -9,7 +16,7 @@ public enum EnumDelayTaskType {
 
     private String key;
 
-    EnumDelayTaskType(String key) {
+    EnumDelayTaskCallBackType(String key) {
         this.key = key;
     }
 

@@ -2,6 +2,13 @@ package com.delaytask;
 
 import com.delaytask.callback.ICallBack;
 
+/**
+ * 
+ * 延迟任务主API
+ * 
+ * @author sunjie
+ *
+ */
 public interface IDelayTask {
 
     /**

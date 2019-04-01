@@ -2,11 +2,18 @@ package com.delaytask.queue;
 
 import java.util.Arrays;
 
+/**
+ * 
+ * 延迟任务回调任务元素
+ * 
+ * @author sunjie
+ *
+ */
 public class DelayTaskElement {
 
     private String name;
 
-    private EnumDelayTaskType type;
+    private EnumDelayTaskCallBackType type;
 
     private String[] params;
 
@@ -22,11 +29,11 @@ public class DelayTaskElement {
         this.name = name;
     }
 
-    public EnumDelayTaskType getType() {
+    public EnumDelayTaskCallBackType getType() {
         return type;
     }
 
-    public void setType(EnumDelayTaskType type) {
+    public void setType(EnumDelayTaskCallBackType type) {
         this.type = type;
     }
 
