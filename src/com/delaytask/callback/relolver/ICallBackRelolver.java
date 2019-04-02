@@ -12,7 +12,27 @@ import com.delaytask.queue.DelayTaskElement;
  */
 public interface ICallBackRelolver extends Runnable {
 
+    /**
+     * 
+     * 设置延迟任务元素
+     * 
+     * @param delayTaskElement
+     * @return void
+     * @exception
+     * @createTime：2019年4月2日
+     * @author: sunjie
+     */
     void setDelayTaskElement(DelayTaskElement delayTaskElement);
 
+    /**
+     * 
+     * 获取延迟任务实例
+     * 
+     * @return
+     * @return ICallBack
+     * @exception
+     * @createTime：2019年4月2日
+     * @author: sunjie
+     */
     ICallBack getCallBackInstance();
 }

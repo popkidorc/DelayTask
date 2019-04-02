@@ -25,12 +25,11 @@ public class DelayTaskConsumer implements Runnable {
     /**
      * 频率
      */
-    private static Integer circleFrequencyMilliSecond = DelayTaskConsts.CIRCLE_FREQUENCY_MILLI_SECOND;
+    private Integer circleFrequencyMilliSecond = DelayTaskConsts.CIRCLE_FREQUENCY_MILLI_SECOND;
     /**
      * 无任务时频率倍数
      */
-    private static Integer notTasksPower = DelayTaskConsts.NOT_TASK_SPOWER;
-
+    private Integer notTasksPower = DelayTaskConsts.NOT_TASK_SPOWER;
     /**
      * 消费队列
      */
@@ -140,6 +139,11 @@ public class DelayTaskConsumer implements Runnable {
 
     public Boolean getIsRun() {
         return isRun;
+    }
+
+    public void getCircleFrequency(Integer circleFrequencyMilliSecond, Integer notTasksPower) {
+        this.circleFrequencyMilliSecond = circleFrequencyMilliSecond;
+        this.notTasksPower = notTasksPower;
     }
 
     @Override

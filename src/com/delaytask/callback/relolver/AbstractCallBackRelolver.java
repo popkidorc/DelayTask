@@ -12,7 +12,9 @@ import com.delaytask.queue.DelayTaskElement;
  */
 public abstract class AbstractCallBackRelolver implements ICallBackRelolver {
 
-    // 队列中的element
+    /**
+     * 队列中的element
+     */
     protected DelayTaskElement delayTaskElement;
 
     public AbstractCallBackRelolver(DelayTaskElement delayTaskElement) {
