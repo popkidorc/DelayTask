@@ -9,9 +9,6 @@ package com.delaytask;
  */
 public class DelayTaskConsts {
 
-    /** 延迟任务redis key */
-    public static final String DELAY_TASK_ZSET_KEY = "DELAY_TASK_ZSET_KEY";
-
     /** 消费频率 */
     public static final Integer CIRCLE_FREQUENCY_MILLI_SECOND = 300;
 
