@@ -40,7 +40,7 @@ public class DelayTask implements IDelayTask {
         delayTaskQueueElement.setDelayTimeUint(TimeUnit.MILLISECONDS);
         DelayTaskElement delayTaskElement = new DelayTaskElement();
         // 防止spring3.X的问题: XXX$$EnhancerBySpringCGLIB$$ed0005e9
-        delayTaskElement.setName(callBackClass.getName().split("$")[0]);
+        delayTaskElement.setName(callBackClass.getName().split("\\$")[0]);
         delayTaskElement.setParams(callBackParams);
         delayTaskQueueElement.setDelayTaskElement(delayTaskElement);
         // 生产任务放入队列
