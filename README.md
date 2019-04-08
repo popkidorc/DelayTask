@@ -97,11 +97,19 @@ public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueEl
 
 ### Run Demo
 ```java
+public static void main(String[] args) throws Exception {
+    // 任务队列
     DelayTaskQueue4RedisDemo delayTaskQueue4Redis = new DelayTaskQueue4RedisDemo();
     // 运行消费端
-    DelayTaskConsumer.getInstance(delayTaskQueue4Redis).startRun();
-
+    DelayTaskConsumer.getInstance(delayTaskQueue4Redis, new AbstractCallBackRelolver() {
+        @Override
+        public ICallBack getCallBackInstance() {
+            //根据情况，用不同方式获取ICallBack实现类。Demo使用spring的getBean获取
+            return (ICallBack) SpringContextUtil.getBean(ICallBack.class);
+        }
+    }).startRun();
     // 延迟任务
     DelayTask delayTask = new DelayTask(delayTaskQueue4Redis);
     delayTask.handle(CallBackDemo.class, new String[] { "p1", "p2", "p3" }, 3);
+}
 ```
