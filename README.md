@@ -92,9 +92,6 @@ public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueEl
 }
 ```
 
-
-
-
 ### Run Demo
 ```java
 public static void main(String[] args) throws Exception {
