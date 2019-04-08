@@ -4,9 +4,8 @@
 
 1、实现ICallBack接口，延迟任务到达延迟时间时会执行callBackMethod(String... params)方法，见“CallBack Demo”；    
 2、实现DelayTaskQueue<DelayTaskQueueElement>接口，作为延迟任务的队列，见“Queue Demo”；    
-   注：分布式服务请使用集中管理的队列，不要使用单机队列（例如redis、zk等）    
+   注：分布式服务请使用集中管理队列（例如redis、zk等）    
 3、启动消费端DelayTaskConsumer.getInstance.startRun，并设置延迟任务及回调，见“Run Demo”。
-
 
 ### CallBack Demo
 ```java
