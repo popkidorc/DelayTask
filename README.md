@@ -1,4 +1,10 @@
 # DelayTask
+使用步骤：
+1、实现ICallBack接口，延迟任务到达延迟时间时会执行callBackMethod(String... params)方法，见“CallBack Demo”；
+2、实现DelayTaskQueue<DelayTaskQueueElement>接口，作为延迟任务的队列，见“Queue Demo”；
+   注：分布式服务请使用集中管理的队列，不要使用单机队列（例如redis、zk等）
+3、获取消费端实例（DelayTaskConsumer.getInstance），并执行startRun方法，开启消费服务；
+4、构造DelayTask类实例，设置延迟任务及回调。
 
 ### CallBack Demo
 ```java
@@ -17,9 +23,9 @@ public class CallBackDemo implements ICallBack {
 public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueElement> {
 
     private static final String DELAY_TASK_ZSET_KEY = "DELAY_TASK_ZSET_KEY";
-
+    // redis连接池
     private JedisPool jedisPool;
-
+    // json转换工具
     private ObjectMapper objectMapper;
 
     public DelayTaskQueue4RedisDemo() {
@@ -34,11 +40,9 @@ public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueEl
     public boolean add(DelayTaskQueueElement delayTaskQueueElement) {
         Jedis jedis = jedisPool.getResource();
         try {
-            String elementJson = objectMapper.writeValueAsString(delayTaskQueueElement.getDelayTaskElement());
-            Long num = jedis.zadd(DELAY_TASK_ZSET_KEY, delayTaskQueueElement.getDelayTime(), elementJson);
-            return num > 0;
+            return jedis.zadd(DELAY_TASK_ZSET_KEY, delayTaskQueueElement.getDelayTime(),
+                    objectMapper.writeValueAsString(delayTaskQueueElement.getDelayTaskElement())) > 0;
         } catch (JsonProcessingException e) {
-            System.out.println("DelayTaskQueue4Redis add is ERROR,, e:" + delayTaskQueueElement);
             e.printStackTrace();
             return false;
         } finally {
@@ -50,11 +54,9 @@ public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueEl
     public boolean remove(DelayTaskQueueElement delayTaskQueueElement) {
         Jedis jedis = jedisPool.getResource();
         try {
-            String elementJson = objectMapper.writeValueAsString(delayTaskQueueElement.getDelayTaskElement());
-            Long num = jedis.zrem(DELAY_TASK_ZSET_KEY, elementJson);
-            return num > 0;
+            return jedis.zrem(DELAY_TASK_ZSET_KEY,
+                    objectMapper.writeValueAsString(delayTaskQueueElement.getDelayTaskElement())) > 0;
         } catch (JsonProcessingException e) {
-            System.out.println("DelayTaskQueue4Redis remove is ERROR,, e:" + delayTaskQueueElement);
             e.printStackTrace();
             return false;
         } finally {
@@ -73,15 +75,13 @@ public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueEl
             for (Tuple tuple : tuples) {
                 DelayTaskQueueElement delayTaskQueueElement = new DelayTaskQueueElement();
                 delayTaskQueueElement.setDelayTime(tuple.getScore());
-                DelayTaskElement delayTaskElement;
-                delayTaskElement = objectMapper.readValue(tuple.getElement(), DelayTaskElement.class);
-                delayTaskQueueElement.setDelayTaskElement(delayTaskElement);
+                delayTaskQueueElement.setDelayTaskElement(objectMapper.readValue(tuple.getElement(),
+                        DelayTaskElement.class));
                 delayTaskQueueElement.setDelayTimeUint(TimeUnit.MILLISECONDS);
                 return delayTaskQueueElement;
             }
             return null;
         } catch (Exception e) {
-            System.out.println("DelayTaskQueue4Redis peek is ERROR, e:" + e);
             e.printStackTrace();
             return null;
         } finally {
@@ -95,12 +95,12 @@ public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueEl
 
 
 ### Run Demo
-```
-DelayTaskQueue4RedisDemo delayTaskQueue4Redis = new DelayTaskQueue4RedisDemo();
-// 运行消费端
-DelayTaskConsumer.getInstance(delayTaskQueue4Redis).startRun();
+```java
+    DelayTaskQueue4RedisDemo delayTaskQueue4Redis = new DelayTaskQueue4RedisDemo();
+    // 运行消费端
+    DelayTaskConsumer.getInstance(delayTaskQueue4Redis).startRun();
 
-// 延迟任务
-DelayTask delayTask = new DelayTask(delayTaskQueue4Redis);
-delayTask.handle(CallBackDemo.class, new String[] { "p1", "p2", "p3" }, 3);
+    // 延迟任务
+    DelayTask delayTask = new DelayTask(delayTaskQueue4Redis);
+    delayTask.handle(CallBackDemo.class, new String[] { "p1", "p2", "p3" }, 3);
 ```
