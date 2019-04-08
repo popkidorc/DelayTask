@@ -2,11 +2,11 @@
 
 ### 使用步骤
 
-1、实现**ICallBack**接口，延迟任务到达延迟时间时会执行**callBackMethod(String... params)**方法，见“CallBack Demo”；    
-2、实现**DelayTaskQueue<DelayTaskQueueElement>**接口，作为延迟任务的队列，见“Queue Demo”；    
+1、实现ICallBack接口，延迟任务到达延迟时间时会执行callBackMethod(String... params)方法，见“CallBack Demo”；    
+2、实现DelayTaskQueue<DelayTaskQueueElement>接口，作为延迟任务的队列，见“Queue Demo”；    
    注：分布式服务请使用集中管理的队列，不要使用单机队列（例如redis、zk等）    
-3、获取消费端实例**DelayTaskConsumer.getInstance**，并执行**startRun**方法，开启消费服务；    
-4、构造**DelayTask**类实例，设置延迟任务及回调。    
+3、获取消费端实例DelayTaskConsumer.getInstance，并执行startRun方法，开启消费服务；    
+4、构造DelayTask类实例，设置延迟任务及回调。    
 
 
 ### CallBack Demo
