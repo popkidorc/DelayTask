@@ -1,22 +1,19 @@
 # DelayTask
 
 ### CallBack Demo
-```
+```java
 public class CallBackDemo implements ICallBack {
 
     public void callBackMethod(String... params) {
-        StringBuffer stringBuffer = new StringBuffer();
         for (String param : params) {
-            stringBuffer.append(param);
-            stringBuffer.append(",");
+            System.out.println("param:" + param);
         }
-        System.out.println("param:" + stringBuffer.toString());
     }
 }
 ```
 
 ### Queue Demo
-```
+```java
 public class DelayTaskQueue4RedisDemo implements DelayTaskQueue<DelayTaskQueueElement> {
 
     private static final String DELAY_TASK_ZSET_KEY = "DELAY_TASK_ZSET_KEY";
