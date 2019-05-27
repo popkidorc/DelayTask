@@ -1,5 +1,9 @@
 # DelayTask
 
+### 介绍图
+
+https://github.com/popkidorc/DelayTask/blob/master/Introduce.png?raw=true
+
 ### 使用步骤
 
 1、实现ICallBack接口，延迟任务到达延迟时间时会执行callBackMethod(String... params)方法，见“CallBack Demo”；    
