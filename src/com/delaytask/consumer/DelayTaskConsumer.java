@@ -8,15 +8,14 @@ import com.delaytask.DelayTaskConsts;
 import com.delaytask.callback.ICallBack;
 import com.delaytask.callback.relolver.AbstractCallBackRelolver;
 import com.delaytask.callback.relolver.ICallBackRelolver;
+import com.delaytask.exception.IDelayTaskExceptionHandler;
 import com.delaytask.queue.DelayTaskQueue;
 import com.delaytask.queue.DelayTaskQueueElement;
 
 /**
- * 
  * 延迟任务队列消费者类，负责启动消费服务以及队列扫描（注意：每个服务节点一个单例，注入时一定要单例singleton）
- * 
- * @author sunjie
  *
+ * @author sunjie
  */
 public class DelayTaskConsumer implements Runnable {
 
@@ -48,27 +47,28 @@ public class DelayTaskConsumer implements Runnable {
     private ICallBackRelolver callBackRelolver;
 
     /**
+     * 任务执行异常处理器
+     */
+    private IDelayTaskExceptionHandler exceptionHandler;
+
+    /**
      * 私有构造类，目的为单例
      */
     private DelayTaskConsumer() {
     }
 
     /**
-     * 
      * 初始化
-     * 
-     * @param delayTaskQueue
-     *            消费队列
-     * @param callBackRelolver
-     *            回调解释器
-     * @return
+     *
+     * @param delayTaskQueue   消费队列
+     * @param callBackRelolver 回调解释器
      * @return DelayTaskConsumer
-     * @exception
+     * @throws
      * @createTime：2019年4月1日
      * @author: sunjie
      */
     public static DelayTaskConsumer getInstance(DelayTaskQueue<DelayTaskQueueElement> delayTaskQueue,
-            ICallBackRelolver callBackRelolver) {
+                                                ICallBackRelolver callBackRelolver, IDelayTaskExceptionHandler exceptionHandler) {
         if (instance == null) {
             synchronized (DelayTaskConsumer.class) {
                 if (instance == null) {
@@ -76,6 +76,7 @@ public class DelayTaskConsumer implements Runnable {
                     instance.delayTaskQueue = delayTaskQueue;
                     instance.consumeTaskThreadPool = Executors.newFixedThreadPool(8);
                     instance.callBackRelolver = callBackRelolver;
+                    instance.exceptionHandler = exceptionHandler;
                 }
             }
         }
@@ -83,14 +84,11 @@ public class DelayTaskConsumer implements Runnable {
     }
 
     /**
-     * 
      * 初始化，默认使用反射解析器
-     * 
-     * @param delayTaskQueue
-     *            消费队列
-     * @return
+     *
+     * @param delayTaskQueue 消费队列
      * @return DelayTaskConsumer
-     * @exception
+     * @throws
      * @createTime：2019年4月1日
      * @author: sunjie
      */
@@ -114,6 +112,10 @@ public class DelayTaskConsumer implements Runnable {
                                 return null;
                             }
                         }
+                    };
+                    instance.exceptionHandler = delayTaskElement -> {
+                        System.out.println("132");
+                        System.out.println("132");
                     };
                 }
             }
@@ -180,13 +182,17 @@ public class DelayTaskConsumer implements Runnable {
             if (nowSecond < delayTime) {
                 continue;
             }
-            // 开始消费
-            // 1.移除队列中任务。TODO 这里有风险：如果回调执行失败，任务移除找不回
-            // 2.验证是否移除成功。为了防止多个服务节点重复执行callback，只有成功remove的那个节点会执行callback，其他节点不执行
-            if (delayTaskQueue.remove(delayTaskElement)) {
-                // 3.执行回调。为了避免callback执行耗时过长影响任务的消费，这里最好也为异步
-                callBackRelolver.setDelayTaskElement(delayTaskElement.getDelayTaskElement());
-                consumeTaskThreadPool.execute(callBackRelolver);
+            try {
+                // 开始消费
+                // 1.移除队列中任务。TODO 这里有风险：如果回调执行失败，任务移除找不回
+                // 2.验证是否移除成功。为了防止多个服务节点重复执行callback，只有成功remove的那个节点会执行callback，其他节点不执行
+                if (delayTaskQueue.remove(delayTaskElement)) {
+                    // 3.执行回调。为了避免callback执行耗时过长影响任务的消费，这里最好也为异步
+                    callBackRelolver.setDelayTaskElement(delayTaskElement.getDelayTaskElement());
+                    consumeTaskThreadPool.execute(callBackRelolver);
+                }
+            } catch (Exception e) {
+                exceptionHandler.handle(delayTaskElement);
             }
         }
     }
